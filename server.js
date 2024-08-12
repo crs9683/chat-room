@@ -5,12 +5,19 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+// Array to store chat messages
+let messages = [];
+const MAX_MESSAGES = 100;  // Set the maximum number of messages to store
+
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
     console.log('a user connected');
+
+    // Send all previous messages to the new user
+    socket.emit('chat history', messages);
 
     // Handle user joining with a username
     socket.on('set username', (username) => {
@@ -23,7 +30,15 @@ io.on('connection', (socket) => {
 
     // Handle incoming messages with the user's username
     socket.on('chat message', (msg) => {
-        io.emit('chat message', `${socket.username}: ${msg}`);
+        const message = `${socket.username}: ${msg}`;
+        messages.push(message); // Add the message to the history array
+
+        // Limit the number of stored messages
+        if (messages.length > MAX_MESSAGES) {
+            messages.shift(); // Remove the oldest message if the array exceeds MAX_MESSAGES
+        }
+
+        io.emit('chat message', message);
     });
 
     // Handle user disconnection

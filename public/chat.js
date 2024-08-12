@@ -9,6 +9,16 @@ const input = document.getElementById('input');
 const messages = document.getElementById('messages');
 const members = document.getElementById('members');
 
+// Display chat history when received
+socket.on('chat history', function(history) {
+    history.forEach(function(msg) {
+        const item = document.createElement('div');
+        item.textContent = msg;
+        messages.appendChild(item);
+    });
+    window.scrollTo(0, document.body.scrollHeight);
+});
+
 usernameSubmit.addEventListener('click', function() {
     const username = usernameInput.value.trim();
     if (username) {
